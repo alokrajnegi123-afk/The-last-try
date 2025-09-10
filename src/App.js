@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-// Reference your image from /public
+// Your image in /public
 const BACKGROUND_IMG = "/manga-one-piece-wallpaper-preview.jpg";
 
 function ZerodhaCalculator() {
@@ -13,20 +13,38 @@ function ZerodhaCalculator() {
     const buyPrice = Number(buy);
     const sellPrice = Number(sell);
     const quantity = Number(qty);
+
     if (!buyPrice || !sellPrice || !quantity) {
       setResult(null);
       return;
     }
+
     const turnover = (buyPrice + sellPrice) * quantity;
-    const grossPL = (sellPrice - buyPrice) * quantity;
-    const brokerage = Math.min(0.0003 * turnover, 20);
+    // Brokerage capped at ₹20/order per leg
+    const brokerageBuy = Math.min(0.0003 * buyPrice * quantity, 20);
+    const brokerageSell = Math.min(0.0003 * sellPrice * quantity, 20);
+    const brokerage = brokerageBuy + brokerageSell;
+
+    // STT only on sell
     const stt = 0.00025 * sellPrice * quantity;
-    const exch = 0.0000345 * turnover;
-    const sebi = 0.00001 * turnover;
+
+    // Exchange charges NSE
+    const exch = 0.0000325 * turnover;
+
+    // SEBI charges
+    const sebi = 0.000001 * turnover;
+
+    // GST
     const gst = 0.18 * (brokerage + exch);
+
+    // Stamp Duty (only buy)
     const stamp = 0.00003 * buyPrice * quantity;
+
+    // Profit/Loss
+    const grossPL = (sellPrice - buyPrice) * quantity;
     const totalCharges = brokerage + stt + exch + sebi + gst + stamp;
     const netPL = grossPL - totalCharges;
+
     setResult({
       grossPL, brokerage, stt, exch, sebi, gst, stamp, netPL
     });
@@ -48,26 +66,24 @@ function ZerodhaCalculator() {
         overflow: "hidden"
       }}
     >
-      {/* Google Fonts for modern, anime style */}
       <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400;700&family=Montserrat:wght@600&display=swap" rel="stylesheet"/>
-      {/* Glass card */}
       <div style={{
-        background: "rgba(10,20,42,0.75)",
+        background: "rgba(12,16,35,0.73)",
         borderRadius: "22px",
-        boxShadow: "0 10px 44px 0 rgba(50,72,165,0.22)",
+        boxShadow: "0 8px 44px 0 rgba(50,72,165,0.27)",
         padding: "44px 30px 36px 30px",
         maxWidth: 420,
         width: "100%",
         backdropFilter: "blur(8px)",
-        border: "2px solid rgba(255,255,255,0.14)",
+        border: "2px solid rgba(255,255,255,0.13)",
         zIndex: 2
       }}>
         <h2 style={{
           fontFamily: "'Bebas Neue', Arial, sans-serif",
           color: "#ffd054",
-          fontSize: "2.7em",
+          fontSize: "2.5em",
           letterSpacing: "2px",
-          textShadow: "0 4px 24px #222, 0 1px 4px #fff",
+          textShadow: "0 4px 16px #222, 0 1px 4px #fff",
           textAlign: "center",
           marginBottom: "20px"
         }}>
@@ -75,7 +91,7 @@ function ZerodhaCalculator() {
         </h2>
         <div style={{ marginBottom: 18 }}>
           <label style={{
-            fontWeight:'bold', fontSize:"1.17em", color:'#ffd054',
+            fontWeight:'bold', fontSize:"1em", color:'#ffd054',
             marginRight:8, letterSpacing:"1px"
           }}>Buy Price:</label>
           <input 
@@ -85,22 +101,22 @@ function ZerodhaCalculator() {
             placeholder="e.g. 707.85"
             style={{
               border: "none",
-              borderRadius: "8px",
+              borderRadius: "9px",
               padding: "8px 13px",
               outline: "none",
               width: "70%",
               marginTop: "3px",
-              background: "rgba(255,255,255,0.19)",
+              background: "rgba(255,255,255,0.18)",
               color: "#fffbe6",
               fontWeight: "bold",
               fontSize: "1em",
-              boxShadow: "0 2px 8px rgba(30,34,47,0.13)"
+              boxShadow: "0 2px 8px rgba(30,34,47,0.1)"
             }}
           />
         </div>
         <div style={{ marginBottom: 18 }}>
           <label style={{
-            fontWeight:'bold', fontSize:"1.17em", color:'#ffd054',
+            fontWeight:'bold', fontSize:"1em", color:'#ffd054',
             marginRight:8, letterSpacing:"1px"
           }}>Sell Price:</label>
           <input 
@@ -110,50 +126,22 @@ function ZerodhaCalculator() {
             placeholder="e.g. 715.15"
             style={{
               border: "none",
-              borderRadius: "8px",
+              borderRadius: "9px",
               padding: "8px 13px",
               outline: "none",
               width: "70%",
               marginTop: "3px",
-              background: "rgba(255,255,255,0.19)",
+              background: "rgba(255,255,255,0.18)",
               color: "#fffbe6",
               fontWeight: "bold",
               fontSize: "1em",
-              boxShadow: "0 2px 8px rgba(30,34,47,0.13)"
+              boxShadow: "0 2px 8px rgba(30,34,47,0.1)"
             }}
           />
         </div>
         <div style={{ marginBottom: 18 }}>
           <label style={{
-            fontWeight:'bold', fontSize:"1.17em", color:'#ffd054',
-            marginRight:8, letterSpacing:"1px"
-          }}>Quantity:</label>
-          <input
-            value={qty}
-            onChange={e => setQty(e.target.value)}
-            type="number"
-            placeholder="e.g. 40"
-            style={{
-              border: "none",
-              borderRadius: "8px",
-              padding: "8px 13px",
-              outline: "none",
-              width: "70%",
-              marginTop: "3px",
-              background: "rgba(255,255,255,0.19)",
-              color: "#fffbe6",
-              fontWeight: "bold",
-              fontSize: "1em",
-              boxShadow: "0 2px 8px rgba(30,34,47,0.13)"
-            }}
-          />
-        </div>
-        <button
-          onClick={calculate}
-          style={{
-            width: "100%",
-            marginTop: "2px",
-            padding: "12px 0",
+            fontWeight:'bold', font
             borderRadius: "10px",
             background: "linear-gradient(90deg, #ffd054 50%, #ff5f54 100%)",
             color: "#222",
